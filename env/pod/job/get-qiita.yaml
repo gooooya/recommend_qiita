@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: get-qiita
+spec:
+  schedule: "*/15 * * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: example
+            image: image: tairayuzuki52431679/depplearning:tvm-cuda-latest
+            workingDir: /app
+            command: ["python"]
+            args:
+            - get_qiita.py
+          restartPolicy: OnFailure

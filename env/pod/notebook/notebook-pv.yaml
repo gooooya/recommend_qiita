@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: notebook-pv
+spec:
+  capacity:
+    storage: 100Mi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /run/desktop/mnt/c/Users/taira/work/onnx/docker/use_gpu/notebook
+  persistentVolumeReclaimPolicy: Retain

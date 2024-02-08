@@ -1,0 +1,15 @@
+# 基本イメージ
+FROM python:3.8
+
+# 作業ディレクトリを設定
+WORKDIR /app2
+
+# MLflowをインストール
+RUN pip install mlflow==2.9.2
+
+# ポート5000を開放
+EXPOSE 5000
+
+# MLflowサーバーを起動
+CMD ["mlflow", "server", "--host", "0.0.0.0", "--backend-store-uri", "sqlite:///mlflow.db", "--default-artifact-root", "s3://my-mlflow-bucket/artifacts"]
+

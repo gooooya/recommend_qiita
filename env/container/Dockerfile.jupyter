@@ -1,0 +1,39 @@
+# CUDAのバージョンに合わせたNVIDIAのCUDAイメージを使用
+# リポジトリ https://gitlab.com/nvidia/container-images/cuda/blob/master/doc/supported-tags.md
+FROM nvidia/cuda:12.3.1-devel-ubuntu22.04
+
+# 必要なパッケージをインストール
+RUN apt-get update && apt-get install -y \
+    git \
+    cmake \
+    libtinfo5 \
+    llvm-14 \
+    llvm-14-dev \
+    llvm-14-tools \
+    zlib1g-dev \
+    build-essential \
+    g++ \
+    python3-pip
+
+# 作業ディレクトリを設定
+WORKDIR /app
+
+# 必要なPythonパッケージをインストール
+COPY requirements.txt /app/requirements.txt
+RUN pip3 install -r requirements.txt
+
+# TVMをクローンしてインストール
+RUN git clone --recursive https://github.com/apache/tvm tvm && \
+    cd tvm && \
+    mkdir build && cd build && \
+    cmake -DUSE_LLVM=llvm-config-14 -DUSE_CUDA=ON .. && \
+    make -j$(nproc)
+
+# 環境変数の設定
+ENV PYTHONPATH /app/tvm/python:/app/tvm/topi/python:/app/tvm/nnvm/python:${PYTHONPATH}
+
+# Jupyter Notebookのポートを開放
+EXPOSE 8888
+
+# Jupyter Notebookの起動コマンドを指定
+CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--allow-root", "--NotebookApp.token=''", "--NotebookApp.password=''"]

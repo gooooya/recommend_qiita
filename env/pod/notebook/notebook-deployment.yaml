@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tvm-cuda-jupyter-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tvm-cuda-jupyter
+  template:
+    metadata:
+      labels:
+        app: tvm-cuda-jupyter
+    spec:
+      containers:
+      - name: tvm-cuda-jupyter
+        image: tairayuzuki52431679/depplearning:tvm-cuda-latest
+        env:
+          - name: POSTGRES_DB
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: DB_NAME
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: DB_USER
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: DB_PASSWORD
+          - name: QIITA_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: notebook-secret
+                key: QIITA_TOKEN
+        ports:
+        - containerPort: 8888
+        volumeMounts:
+        - name: notebook-storage
+          mountPath: /app
+      volumes:
+      - name: notebook-storage
+        persistentVolumeClaim:
+          claimName: notebook-pvc
